@@ -46,9 +46,10 @@
 #define THROTTLE_MAX 2092
 #define THROTTLE_DEFAULT (THROTTLE_MIN + THROTTLE_MAX) / 2
 
-// MCP4725 DAC board addresses [0x62, 0x63] (L/H or open/close respectively)
-#define I2C_ADR_THROTTLE_L 0x62
-#define I2C_ADR_THROTTLE_R 0x63
+// MCP4725 DAC board addresses [0x60, 0x61] (L/H or open/close respectively)
+// other model board addresses [0x62, 0x63]
+#define I2C_ADR_THROTTLE_L 0x60
+#define I2C_ADR_THROTTLE_R 0x61
 
 // PCF8574 IO expansion board addresses [0x20..0x27]
 // | A2 | A1 | A0 | I2C address |

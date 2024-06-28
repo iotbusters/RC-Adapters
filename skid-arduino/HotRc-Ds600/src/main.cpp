@@ -92,6 +92,7 @@ void loop()
   ControllerOutput leftDrive = leftController.getDrive();
   ControllerOutput rightDrive = rightController.getDrive();
 
+  // ----- debug information -----
   Serial.print("Left: (");
   Serial.print(1 + leftDrive.speed2 + leftDrive.speed3);
   Serial.print(!leftDrive.isReversed ? "F) " : "R) ");
@@ -106,17 +107,18 @@ void loop()
     Serial.println(rightDrive.throttle, 3);
   else
     Serial.println("[break]");
+  // ----- debug information -----
 
   int throttleLeftValue = mapNumber(leftDrive.throttle, 0.0f, 1.0f, INT_12BIT_MIN, INT_12BIT_MAX);
   Wire.beginTransmission(I2C_ADR_THROTTLE_L);
-  Wire.write(throttleLeftValue >> 8);  // high 8 bits
-  Wire.write(throttleLeftValue & 255); // low 8 bits
+  Wire.write(throttleLeftValue >> 8);   // high 8 bits
+  Wire.write(throttleLeftValue & 0xFF); // low 8 bits
   Wire.endTransmission();
 
   int throttleRightValue = mapNumber(rightDrive.throttle, 0.0f, 1.0f, INT_12BIT_MIN, INT_12BIT_MAX);
   Wire.beginTransmission(I2C_ADR_THROTTLE_R);
-  Wire.write(throttleRightValue >> 8);  // high 8 bits
-  Wire.write(throttleRightValue & 255); // low 8 bits
+  Wire.write(throttleRightValue >> 8);   // high 8 bits
+  Wire.write(throttleRightValue & 0xFF); // low 8 bits
   Wire.endTransmission();
 
   byte relays = 0x00;
