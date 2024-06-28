@@ -12,35 +12,59 @@
 #define PIN_D11 11
 #define PIN_D12 12
 #define PIN_D13 13
-#define PIN_D14 A0
-#define PIN_D15 A1
-#define PIN_D16 A2
-#define PIN_D17 A3
-#define PIN_D18 A6
-#define PIN_D19 A7
 
-// I2C(SDA) PIN_A4
-// I2C(SCL) PIN_A5
-#define CH1 PIN_D2
-#define CH2 PIN_D3
-#define CH3 PIN_D4
-#define CH4 PIN_D5
-#define CH5 PIN_D6
-#define CH6 PIN_D7
-#define BREAKS PIN_D8
-// D9
-#define REVERSE_L PIN_D10
-#define REVERSE_R PIN_D11
-#define SPEED_L2 PIN_D12
-#define SPEED_L3 PIN_D13
-// #define SPEED_R2 PIN_D
-// #define SPEED_R3 PIN_D
-#define THROTTLE_CUR_L1 PIN_D14
-#define THROTTLE_CUR_L2 PIN_D15
-#define THROTTLE_CUR_L3 PIN_D16
-#define THROTTLE_CUR_R1 PIN_D17
-#define THROTTLE_CUR_R2 PIN_D18
-#define THROTTLE_CUR_R3 PIN_D19
+#define CH1 PIN_D2 // RC channel 1 (steering) pin
+#define CH2 PIN_D3 // RC channel 2 (throttle) pin
+#define CH3 PIN_D4 // RC channel 3 (auxiliary) pin
+#define CH4 PIN_D5 // RC channel 4 (auxiliary) pin
+#define CH5 PIN_D6 // RC channel 5 (auxiliary) pin
+#define CH6 PIN_D7 // RC channel 6 (auxiliary) pin
 
-#define I2C_THROTTLE_LEFT 0x62
-#define I2C_THROTTLE_RIGHT 0x63
+// note: Free pins [D14..D19]
+
+#define THROTTLE_CUR_L1 A0 // 1st left drive current throttle pin
+#define THROTTLE_CUR_L2 A1 // 2nd left drive current throttle pin
+#define THROTTLE_CUR_L3 A2 // 3rd left drive current throttle pin
+#define THROTTLE_CUR_R1 A3 // 1st right drive current throttle pin
+// note: A4 and A5 are dedicated to I2C
+// I2C(SDA) : A4
+// I2C(SCL) : A5
+#define THROTTLE_CUR_R2 A6 // 2nd right drive current throttle pin
+#define THROTTLE_CUR_R3 A7 // 3rd right drive current throttle pin
+
+#define INT_12BIT_MIN 0
+#define INT_12BIT_MAX 4095
+
+#define THROTTLE_CURRENT_MIN 190 // pull-down resistor 6.8kOhms
+#define THROTTLE_CURRENT_MAX 1023
+
+#define STEERING_MIN 553
+#define STEERING_MAX 2541
+#define STEERING_DEFAULT (STEERING_MIN + STEERING_MAX) / 2
+
+#define THROTTLE_MIN 1100
+#define THROTTLE_MAX 2092
+#define THROTTLE_DEFAULT (THROTTLE_MIN + THROTTLE_MAX) / 2
+
+// MCP4725 DAC board addresses [0x62, 0x63] (L/H or open/close respectively)
+#define I2C_ADR_THROTTLE_L 0x62
+#define I2C_ADR_THROTTLE_R 0x63
+
+// PCF8574 IO expansion board addresses [0x20..0x27]
+// | A2 | A1 | A0 | I2C address |
+// | 0  | 0  | 0  | 0x20        |
+// | 0  | 0  | 1  | 0x21        |
+// | 0  | 1  | 0  | 0x22        |
+// | 0  | 1  | 1  | 0x23        |
+// | 1  | 0  | 0  | 0x24        |
+// | 1  | 0  | 1  | 0x25        |
+// | 1  | 1  | 0  | 0x26        |
+// | 1  | 1  | 1  | 0x27        |
+#define I2C_ADR_RELAYS 0x20
+#define I2C_RELAY_BREAKS 0    // Breaks pin on a 8bit IO expansion board
+#define I2C_RELAY_REVERSE_L 1 // Left drive reverse pin on a 8bit IO expansion board
+#define I2C_RELAY_REVERSE_R 2 // Right drive reverse pin on a 8bit IO expansion board
+#define I2C_RELAY_SPEED_L2 3  // Left drive 2nd speed pin on a 8bit IO expansion board
+#define I2C_RELAY_SPEED_L3 4  // Left drive 3rd speed pin on a 8bit IO expansion board
+#define I2C_RELAY_SPEED_R2 5  // Right drive 2nd speed pin on a 8bit IO expansion board
+#define I2C_RELAY_SPEED_R3 6  // Right drive 3rd speed pin on a 8bit IO expansion board
