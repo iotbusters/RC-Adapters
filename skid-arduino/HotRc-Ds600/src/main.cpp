@@ -119,7 +119,7 @@ void loop()
   Wire.write(throttleRightValue & 255); // low 8 bits
   Wire.endTransmission();
 
-  byte relays = 0xFF;
+  byte relays = 0x00;
   bool breaks = leftDrive.Breaks() || rightDrive.Breaks();
   relays |= (byte)breaks << I2C_RELAY_BREAKS;
   relays |= (byte)leftDrive.isReversed << I2C_RELAY_REVERSE_L;
