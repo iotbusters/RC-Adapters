@@ -34,17 +34,21 @@
 
 #define INT_12BIT_MIN 0
 #define INT_12BIT_MAX 4095
+#define THROTTLE_DESIRE_MIN 862  // 0.85v      / 4.04v(5v arduino) * INT_12BIT_MAX
+#define THROTTLE_DESIRE_MAX 4000 // 3.27v +20% / 4.04v(5v arduino) * INT_12BIT_MAX
 
-#define THROTTLE_CURRENT_MIN 190 // pull-down resistor 6.8kOhms
-#define THROTTLE_CURRENT_MAX 1023
+#define INT_10BIT_MIN 0
+#define INT_10BIT_MAX 1023
+#define THROTTLE_CURRENT_MIN 190           // pull-down resistor 6.8kOhms
+#define THROTTLE_CURRENT_MAX INT_10BIT_MAX // theoretical, measurement is required
 
-#define STEERING_MIN 553
-#define STEERING_MAX 2541
-#define STEERING_DEFAULT (STEERING_MIN + STEERING_MAX) / 2
+#define STEERING_MIN 553                                   // PWM min value of steering control
+#define STEERING_MAX 2541                                  // PWM max value of steering control
+#define STEERING_DEFAULT (STEERING_MIN + STEERING_MAX) / 2 // PWM middle value of steering control
 
-#define THROTTLE_MIN 1100
-#define THROTTLE_MAX 2092
-#define THROTTLE_DEFAULT (THROTTLE_MIN + THROTTLE_MAX) / 2
+#define THROTTLE_MIN 1100                                  // PWM min value of throttle control
+#define THROTTLE_MAX 2092                                  // max min value of throttle control
+#define THROTTLE_DEFAULT (THROTTLE_MIN + THROTTLE_MAX) / 2 // PWM middle value of throttle control
 
 // MCP4725 DAC board addresses [0x60, 0x61] (L/H or open/close respectively)
 // other model board addresses [0x62, 0x63]
@@ -65,7 +69,5 @@
 #define I2C_RELAY_BREAKS 0    // Breaks pin on a 8bit IO expansion board
 #define I2C_RELAY_REVERSE_L 1 // Left drive reverse pin on a 8bit IO expansion board
 #define I2C_RELAY_REVERSE_R 2 // Right drive reverse pin on a 8bit IO expansion board
-#define I2C_RELAY_SPEED_L2 3  // Left drive 2nd speed pin on a 8bit IO expansion board
-#define I2C_RELAY_SPEED_L3 4  // Left drive 3rd speed pin on a 8bit IO expansion board
-#define I2C_RELAY_SPEED_R2 5  // Right drive 2nd speed pin on a 8bit IO expansion board
-#define I2C_RELAY_SPEED_R3 6  // Right drive 3rd speed pin on a 8bit IO expansion board
+#define I2C_RELAY_SPEED2_L 3  // Left drive 2nd speed pin on a 8bit IO expansion board
+#define I2C_RELAY_SPEED2_R 4  // Right drive 2nd speed pin on a 8bit IO expansion board

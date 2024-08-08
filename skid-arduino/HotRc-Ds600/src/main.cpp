@@ -25,7 +25,7 @@ void setup()
   // pinMode(CH5, INPUT);
   // pinMode(CH6, INPUT);
 
-  pinMode(THROTTLE_CUR_L1, INPUT_PULLUP);
+  pinMode(THROTTLE_CUR_L1, INPUT);
   pinMode(THROTTLE_CUR_L2, INPUT);
   pinMode(THROTTLE_CUR_L3, INPUT);
   pinMode(THROTTLE_CUR_R1, INPUT);
@@ -33,6 +33,20 @@ void setup()
   pinMode(THROTTLE_CUR_R3, INPUT);
 
   pinMode(LED_BUILTIN, OUTPUT);
+
+  Wire.beginTransmission(I2C_ADR_THROTTLE_L);
+  Wire.write(0 >> 8);   // high 8 bits
+  Wire.write(0 & 0xFF); // low 8 bits
+  Wire.endTransmission();
+
+  Wire.beginTransmission(I2C_ADR_THROTTLE_R);
+  Wire.write(0xFF >> 8);   // high 8 bits
+  Wire.write(0xFF & 0xFF); // low 8 bits
+  Wire.endTransmission();
+
+  Wire.beginTransmission(I2C_ADR_RELAYS);
+  Wire.write(0xFF);
+  Wire.endTransmission();
 }
 
 void loop()
@@ -94,14 +108,14 @@ void loop()
 
   // ----- debug information -----
   Serial.print("Left: (");
-  Serial.print(1 + leftDrive.speed2 + leftDrive.speed3);
+  Serial.print(leftDrive.speed);
   Serial.print(!leftDrive.isReversed ? "F) " : "R) ");
   if (!leftDrive.Breaks())
     Serial.print(leftDrive.throttle, 3);
   else
     Serial.print("[break]");
   Serial.print("  Right: (");
-  Serial.print(1 + rightDrive.speed2 + rightDrive.speed3);
+  Serial.print(rightDrive.speed);
   Serial.print(!rightDrive.isReversed ? "F) " : "R) ");
   if (!rightDrive.Breaks())
     Serial.println(rightDrive.throttle, 3);
@@ -109,31 +123,30 @@ void loop()
     Serial.println("[break]");
   // ----- debug information -----
 
-  int throttleLeftValue = mapNumber(leftDrive.throttle, 0.0f, 1.0f, INT_12BIT_MIN, INT_12BIT_MAX);
+  byte relays = 0x00;
+  relays |= (byte)(!leftDrive.Breaks() && !rightDrive.Breaks()) << I2C_RELAY_BREAKS;
+  relays |= (byte)leftDrive.isReversed << I2C_RELAY_REVERSE_L;
+  relays |= (byte)rightDrive.isReversed << I2C_RELAY_REVERSE_R;
+  relays |= (byte)(leftDrive.speed == 2) << I2C_RELAY_SPEED2_L;
+  relays |= (byte)(rightDrive.speed == 2) << I2C_RELAY_SPEED2_R;
+  Wire.beginTransmission(I2C_ADR_RELAYS);
+  Wire.write(~relays); // inverted bits
+  Wire.endTransmission();
+
+  delay(100); // ensure controller is updated to interpret throttle correctly
+
+  int throttleLeftValue = mapNumber(leftDrive.throttle, 0.0f, 1.0f, THROTTLE_DESIRE_MIN, THROTTLE_DESIRE_MAX);
   Wire.beginTransmission(I2C_ADR_THROTTLE_L);
   Wire.write(throttleLeftValue >> 8);   // high 8 bits
   Wire.write(throttleLeftValue & 0xFF); // low 8 bits
   Wire.endTransmission();
 
-  int throttleRightValue = mapNumber(rightDrive.throttle, 0.0f, 1.0f, INT_12BIT_MIN, INT_12BIT_MAX);
+  int throttleRightValue = mapNumber(rightDrive.throttle, 0.0f, 1.0f, THROTTLE_DESIRE_MIN, THROTTLE_DESIRE_MAX);
   Wire.beginTransmission(I2C_ADR_THROTTLE_R);
   Wire.write(throttleRightValue >> 8);   // high 8 bits
   Wire.write(throttleRightValue & 0xFF); // low 8 bits
   Wire.endTransmission();
 
-  byte relays = 0x00;
-  bool breaks = leftDrive.Breaks() || rightDrive.Breaks();
-  relays |= (byte)breaks << I2C_RELAY_BREAKS;
-  relays |= (byte)leftDrive.isReversed << I2C_RELAY_REVERSE_L;
-  relays |= (byte)rightDrive.isReversed << I2C_RELAY_REVERSE_R;
-  relays |= (byte)leftDrive.speed2 << I2C_RELAY_SPEED_L2;
-  relays |= (byte)leftDrive.speed3 << I2C_RELAY_SPEED_L3;
-  relays |= (byte)rightDrive.speed2 << I2C_RELAY_SPEED_R2;
-  relays |= (byte)rightDrive.speed3 << I2C_RELAY_SPEED_R3;
-  Wire.beginTransmission(I2C_ADR_RELAYS);
-  Wire.write(relays);
-  Wire.endTransmission();
-
   digitalWrite(LED_BUILTIN, LOW);
-  delay(300);
+  delay(200);
 }

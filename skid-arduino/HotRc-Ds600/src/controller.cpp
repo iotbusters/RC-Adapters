@@ -7,7 +7,8 @@ byte getSpeedLevel(float throttle)
     for (byte speed = 1; speed < size(maxSpeeds); speed++)
         if (throttle <= maxSpeeds[speed])
             return speed;
-    return 1; // first speed for unknown scenario
+
+    return 1; // unknown scenario
 }
 
 bool isChanged(ControllerInput last, ControllerInput current)
@@ -46,38 +47,40 @@ bool Controller::tryUpdate(ControllerInput request)
         // throttle strategies
         // [ ] proportional when throttle is directly mapped on speed scale [1..3]
         // [x] smoothly accelerated throttle up to requested value by increasing 20% current throttle to desired
-        float acceleratedThrottle = min(currentThrottle * SPEED_ACC_MULT, desiredThrottle); // smoothly accelerated throttle up to its desired value
+
+        // smoothly accelerated throttle up to its desired value
+        float acceleratedThrottle = min(currentThrottle * SPEED_ACC_MULT, desiredThrottle);
 
         if (isTurning)
         {
             // impact accelerated throttle proportionally to its desired and steering values
             float turningFactor = (1.0f - steering * STEERING_MULT / desiredThrottle);
             // drop throttle down to turn
-            acceleratedThrottle = max(acceleratedThrottle * turningFactor, EPSILON);
+            acceleratedThrottle = max(acceleratedThrottle * turningFactor, THROTTLE_MIN);
         }
 
         // find speed level by current throttle
         byte speed = getSpeedLevel(desiredThrottle);
-        // map proportionally current throttle to selected speed throttle [10-100%]
-        float speedScaledThrottle = mapNumber(acceleratedThrottle, max(0.0f, maxSpeeds[speed - 1] - 0.1f), maxSpeeds[speed], 0.0f, 1.0f);
-        this->response = ControllerOutput(speed >= 2 /*speed2*/, speed == 3 /*speed3*/, speedScaledThrottle, false /*reverse*/);
+        // map proportionally current throttle to selected speed throttle [1-100%]
+        float speedScaledThrottle = mapNumber(acceleratedThrottle, maxSpeeds[speed - 1], maxSpeeds[speed], THROTTLE_MIN, 1.0f);
+        this->response = ControllerOutput(speed == 3 /*isHighSpeed*/, speedScaledThrottle, false /*reverse*/);
         return true;
     }
 
     if (isBackward)
     {
         float throttle = isTurning
-                             ? 0.0f     // no move
-                             : EPSILON; // min throttle to activate reverse
-        this->response = ControllerOutput(false /*speed2*/, false /*speed3*/, throttle, !isTurning /*reverse*/);
+                             ? 0.0f  // no move
+                             : 0.5f; // min throttle to activate reverse
+        this->response = ControllerOutput(1 /*speed*/, throttle, !isTurning /*reverse*/);
         return true;
     }
 
     // spinning
     float throttle = isTurning
-                         ? EPSILON      // min throttle to activate reverse
-                         : SPEED_1_MAX; // equalize reverse constant speed
-    this->response = ControllerOutput(false, false, throttle, isTurning);
+                         ? 0.5f  // min throttle to activate reverse
+                         : 0.5f; // equalize reverse constant speed
+    this->response = ControllerOutput(1 /*speed*/, throttle, isTurning /*reverse*/);
     return true;
 }
 
