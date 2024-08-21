@@ -2,28 +2,25 @@
 #include <Controller.h>
 #include <Utils.h>
 
-byte getSpeedLevel(float throttle)
+bool isChanged(ControllerInput last, ControllerInput next)
 {
-    for (byte speed = 1; speed < size(maxSpeeds); speed++)
-        if (throttle <= maxSpeeds[speed])
-            return speed;
-
-    return 1; // unknown scenario
-}
-
-bool isChanged(ControllerInput last, ControllerInput current)
-{
-    return current.desiredThrottle > current.currentThrottle                // throttle is being accelerated smoothly up to desired value
-           || abs(last.desiredThrottle - current.desiredThrottle) > EPSILON // no relevant desired throttle change
-           || abs(last.steering - current.steering) > EPSILON;              // no relevant steering change
+    return abs(next.desiredThrottle - next.currentThrottle) > EPSILON    // throttle is being accelerated smoothly up to desired value
+           || abs(last.desiredThrottle - next.desiredThrottle) > EPSILON // no relevant desired throttle change
+           || abs(last.steering - next.steering) > EPSILON;              // no relevant steering change
 }
 
 Controller::Controller(bool isLeft) { this->turnSign = isLeft ? -1 : 1; }
 
 bool Controller::tryUpdate(ControllerInput request)
 {
+    // todo: remove once the current throttle feature is supported
+    request.currentThrottle = request.currentThrottle == 0 ? this->response.throttle : request.currentThrottle;
+
     if (!isChanged(this->request, request))
         return false; // nothing to recalculate
+
+    int timeDelta = max(0, millis() - this->lastTime); // the time since last calculation
+    this->lastTime = millis();
 
     this->request = request;
 
@@ -45,11 +42,12 @@ bool Controller::tryUpdate(ControllerInput request)
     if (isForward)
     {
         // throttle strategies
-        // [ ] proportional when throttle is directly mapped on speed scale [1..3]
-        // [x] smoothly accelerated throttle up to requested value by increasing 20% current throttle to desired
+        // [ ] proportional when throttle is directly mapped on speed scale [1..2]
+        // [x] smoothly accelerating throttle up by increasing 20% to desired according to time
+        // [ ] smoothly accelerating throttle up to requested value by increasing 20% current throttle to desired
 
         // smoothly accelerated throttle up to its desired value
-        float acceleratedThrottle = min(currentThrottle * SPEED_ACC_MULT, desiredThrottle);
+        float acceleratedThrottle = min(currentThrottle + THROTTLE_ACC_INC(timeDelta), desiredThrottle);
 
         if (isTurning)
         {
@@ -59,11 +57,7 @@ bool Controller::tryUpdate(ControllerInput request)
             acceleratedThrottle = max(acceleratedThrottle * turningFactor, THROTTLE_MIN);
         }
 
-        // find speed level by current throttle
-        byte speed = getSpeedLevel(desiredThrottle);
-        // map proportionally current throttle to selected speed throttle [1-100%]
-        float speedScaledThrottle = mapNumber(acceleratedThrottle, maxSpeeds[speed - 1], maxSpeeds[speed], THROTTLE_MIN, 1.0f);
-        this->response = ControllerOutput(speed == 3 /*isHighSpeed*/, speedScaledThrottle, false /*reverse*/);
+        this->response = ControllerOutput(acceleratedThrottle, false /*reverse*/);
         return true;
     }
 
@@ -72,7 +66,7 @@ bool Controller::tryUpdate(ControllerInput request)
         float throttle = isTurning
                              ? 0.0f  // no move
                              : 0.5f; // min throttle to activate reverse
-        this->response = ControllerOutput(1 /*speed*/, throttle, !isTurning /*reverse*/);
+        this->response = ControllerOutput(throttle, !isTurning /*reverse*/);
         return true;
     }
 
@@ -80,7 +74,7 @@ bool Controller::tryUpdate(ControllerInput request)
     float throttle = isTurning
                          ? 0.5f  // min throttle to activate reverse
                          : 0.5f; // equalize reverse constant speed
-    this->response = ControllerOutput(1 /*speed*/, throttle, isTurning /*reverse*/);
+    this->response = ControllerOutput(throttle, isTurning /*reverse*/);
     return true;
 }
 

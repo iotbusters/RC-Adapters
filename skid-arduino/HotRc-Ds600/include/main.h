@@ -39,8 +39,10 @@
 
 #define INT_10BIT_MIN 0
 #define INT_10BIT_MAX 1023
-#define THROTTLE_CURRENT_MIN 190           // pull-down resistor 6.8kOhms
-#define THROTTLE_CURRENT_MAX INT_10BIT_MAX // theoretical, measurement is required
+// divider 24v to 5v: 27kOhms to PIN and 10kOhms to GND (test is needed)
+// pull-down resistor: 6.8-10kOhms to GND (test is needed)
+#define THROTTLE_CURRENT_MIN 190           // todo: measure min value when divider and pull-down resistor are applied
+#define THROTTLE_CURRENT_MAX INT_10BIT_MAX // todo: measure max value when divider and pull-down resistor are applied
 
 #define STEERING_MIN 553                                   // PWM min value of steering control
 #define STEERING_MAX 2541                                  // PWM max value of steering control

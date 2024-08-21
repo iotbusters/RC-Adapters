@@ -25,12 +25,13 @@ void setup()
   // pinMode(CH5, INPUT);
   // pinMode(CH6, INPUT);
 
-  pinMode(THROTTLE_CUR_L1, INPUT);
-  pinMode(THROTTLE_CUR_L2, INPUT);
-  pinMode(THROTTLE_CUR_L3, INPUT);
-  pinMode(THROTTLE_CUR_R1, INPUT);
-  pinMode(THROTTLE_CUR_R2, INPUT);
-  pinMode(THROTTLE_CUR_R3, INPUT);
+  // todo: uncomment once the current throttle feature is supported
+  // pinMode(THROTTLE_CUR_L1, INPUT);
+  // pinMode(THROTTLE_CUR_L2, INPUT);
+  // pinMode(THROTTLE_CUR_L3, INPUT);
+  // pinMode(THROTTLE_CUR_R1, INPUT);
+  // pinMode(THROTTLE_CUR_R2, INPUT);
+  // pinMode(THROTTLE_CUR_R3, INPUT);
 
   pinMode(LED_BUILTIN, OUTPUT);
 
@@ -62,33 +63,25 @@ void loop()
   // int channel4Value = pulseIn(CH4, HIGH);
   // int channel5Value = pulseIn(CH5, HIGH);
   // int channel6Value = pulseIn(CH6, HIGH);
-  int leftCurrentThrottle1Value = analogRead(THROTTLE_CUR_L1);
-  int leftCurrentThrottle2Value = analogRead(THROTTLE_CUR_L2);
-  int leftCurrentThrottle3Value = analogRead(THROTTLE_CUR_L3);
-  int rightCurrentThrottle1Value = analogRead(THROTTLE_CUR_R1);
-  int rightCurrentThrottle2Value = analogRead(THROTTLE_CUR_R2);
-  int rightCurrentThrottle3Value = analogRead(THROTTLE_CUR_R3);
+
+  // todo: uncomment once the current throttle feature is supported
+  // ensure non-zero to cover a lost wire connection case
+  // a pull-down 6-7k resistor on each pin is required
+  // int leftCurrentThrottle1Value = analogRead(THROTTLE_CUR_L1);
+  // int leftCurrentThrottle2Value = analogRead(THROTTLE_CUR_L2);
+  // int leftCurrentThrottle3Value = analogRead(THROTTLE_CUR_L3);
+  // int rightCurrentThrottle1Value = analogRead(THROTTLE_CUR_R1);
+  // int rightCurrentThrottle2Value = analogRead(THROTTLE_CUR_R2);
+  // int rightCurrentThrottle3Value = analogRead(THROTTLE_CUR_R3);
+  // int leftCurrentThrottleValue = minArray({leftCurrentThrottle1Value, leftCurrentThrottle2Value, leftCurrentThrottle3Value});
+  // int rightCurrentThrottleValue = minArray({rightCurrentThrottle1Value, rightCurrentThrottle2Value, rightCurrentThrottle3Value});
 
   float steering = mapNumber(channel1Value, STEERING_MIN, STEERING_MAX, -1.0f, 1.0f);
   float desiredThrottle = mapNumber(channel2Value, THROTTLE_MIN, THROTTLE_MAX, -1.0f, 1.0f);
 
-  float leftCurrentThrottle1 = mapNumber(leftCurrentThrottle1Value, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
-  float leftCurrentThrottle2 = mapNumber(leftCurrentThrottle2Value, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
-  float leftCurrentThrottle3 = mapNumber(leftCurrentThrottle3Value, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
-  float rightCurrentThrottle1 = mapNumber(rightCurrentThrottle1Value, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
-  float rightCurrentThrottle2 = mapNumber(rightCurrentThrottle2Value, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
-  float rightCurrentThrottle3 = mapNumber(rightCurrentThrottle3Value, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
-  // ensure non-zero to cover a lost wire connection case
-  // a pull-down 6-7k resistor on each pin is required
-  // leftCurrentThrottle1 = compareExchange(leftCurrentThrottle1, desiredThrottle, 0.0f);
-  // leftCurrentThrottle2 = compareExchange(leftCurrentThrottle2, desiredThrottle, 0.0f);
-  // leftCurrentThrottle3 = compareExchange(leftCurrentThrottle3, desiredThrottle, 0.0f);
-  // rightCurrentThrottle1 = compareExchange(rightCurrentThrottle1, desiredThrottle, 0.0f);
-  // rightCurrentThrottle2 = compareExchange(rightCurrentThrottle2, desiredThrottle, 0.0f);
-  // rightCurrentThrottle3 = compareExchange(rightCurrentThrottle3, desiredThrottle, 0.0f);
-
-  float leftCurrentThrottle = minArray({leftCurrentThrottle1, leftCurrentThrottle2, leftCurrentThrottle3});
-  float rightCurrentThrottle = minArray({rightCurrentThrottle1, rightCurrentThrottle2, rightCurrentThrottle3});
+  // todo: uncomment once the current throttle feature is supported
+  float leftCurrentThrottle = 0.0;  // mapNumber(leftCurrentThrottleValue, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
+  float rightCurrentThrottle = 0.0; // mapNumber(rightCurrentThrottleValue, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
 
   ControllerInput leftRequest = ControllerInput(leftCurrentThrottle, desiredThrottle, steering),
                   rightRequest = ControllerInput(rightCurrentThrottle, desiredThrottle, steering);
@@ -103,22 +96,32 @@ void loop()
 
   digitalWrite(LED_BUILTIN, HIGH);
 
-  ControllerOutput leftDrive = leftController.getDrive();
-  ControllerOutput rightDrive = rightController.getDrive();
+  ControllerOutput leftDrive = leftController.getDrive(),
+                   rightDrive = rightController.getDrive();
 
   // ----- debug information -----
   Serial.print("Left: (");
   Serial.print(leftDrive.speed);
   Serial.print(!leftDrive.isReversed ? "F) " : "R) ");
   if (!leftDrive.Breaks())
+  {
+    Serial.print(leftDrive.speedThrottle, 3);
+    Serial.print("(");
     Serial.print(leftDrive.throttle, 3);
+    Serial.print(")");
+  }
   else
     Serial.print("[break]");
   Serial.print("  Right: (");
   Serial.print(rightDrive.speed);
   Serial.print(!rightDrive.isReversed ? "F) " : "R) ");
   if (!rightDrive.Breaks())
-    Serial.println(rightDrive.throttle, 3);
+  {
+    Serial.print(rightDrive.speedThrottle, 3);
+    Serial.print("(");
+    Serial.print(rightDrive.throttle, 3);
+    Serial.println(")");
+  }
   else
     Serial.println("[break]");
   // ----- debug information -----
@@ -135,13 +138,13 @@ void loop()
 
   delay(100); // ensure controller is updated to interpret throttle correctly
 
-  int throttleLeftValue = mapNumber(leftDrive.throttle, 0.0f, 1.0f, THROTTLE_DESIRE_MIN, THROTTLE_DESIRE_MAX);
+  int throttleLeftValue = mapNumber(leftDrive.speedThrottle, 0.0f, 1.0f, THROTTLE_DESIRE_MIN, THROTTLE_DESIRE_MAX);
   Wire.beginTransmission(I2C_ADR_THROTTLE_L);
   Wire.write(throttleLeftValue >> 8);   // high 8 bits
   Wire.write(throttleLeftValue & 0xFF); // low 8 bits
   Wire.endTransmission();
 
-  int throttleRightValue = mapNumber(rightDrive.throttle, 0.0f, 1.0f, THROTTLE_DESIRE_MIN, THROTTLE_DESIRE_MAX);
+  int throttleRightValue = mapNumber(rightDrive.speedThrottle, 0.0f, 1.0f, THROTTLE_DESIRE_MIN, THROTTLE_DESIRE_MAX);
   Wire.beginTransmission(I2C_ADR_THROTTLE_R);
   Wire.write(throttleRightValue >> 8);   // high 8 bits
   Wire.write(throttleRightValue & 0xFF); // low 8 bits
