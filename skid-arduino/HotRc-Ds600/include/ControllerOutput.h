@@ -5,8 +5,9 @@
 #define SPEED_3_MAX 1.0f // 100%
 const float maxSpeeds[] = {SPEED_STOP, SPEED_2_MAX, SPEED_3_MAX};
 
-#define THROTTLE_MIN 0.1f // 10% throttle to start moving with
-#define THROTTLE_MAX 1.0f // 100% throttle
+#define THROTTLE_MIN 0.1f  // 10% throttle to start moving with
+#define THROTTLE_MAX 1.0f  // 100% throttle
+#define THROTTLE_REV 0.44f // 44% constant reverse throttle
 
 struct ControllerOutput
 {

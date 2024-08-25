@@ -64,17 +64,14 @@ bool Controller::tryUpdate(ControllerInput request)
     if (isBackward)
     {
         float throttle = isTurning
-                             ? 0.0f  // no move
-                             : 0.5f; // min throttle to activate reverse
+                             ? 0.0f          // no move
+                             : THROTTLE_REV; // min throttle to activate reverse
         this->response = ControllerOutput(throttle, !isTurning /*reverse*/);
         return true;
     }
 
     // spinning
-    float throttle = isTurning
-                         ? 0.5f  // min throttle to activate reverse
-                         : 0.5f; // equalize reverse constant speed
-    this->response = ControllerOutput(throttle, isTurning /*reverse*/);
+    this->response = ControllerOutput(THROTTLE_REV, isTurning /*reverse*/);
     return true;
 }
 
