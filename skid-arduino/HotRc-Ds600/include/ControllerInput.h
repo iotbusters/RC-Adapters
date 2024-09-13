@@ -1,3 +1,5 @@
+#pragma once
+
 struct ControllerInput
 {
     static ControllerInput idle;

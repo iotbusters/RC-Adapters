@@ -11,33 +11,35 @@ bool isChanged(ControllerInput last, ControllerInput next)
 
 Controller::Controller(bool isLeft) { this->turnSign = isLeft ? -1 : 1; }
 
-bool Controller::tryUpdate(ControllerInput request)
+bool Controller::tryUpdate(ControllerInput input)
 {
     // todo: remove once the current throttle feature is supported
-    request.currentThrottle = request.currentThrottle == 0 ? this->response.throttle : request.currentThrottle;
+    input.currentThrottle = input.currentThrottle == 0
+                                ? this->output.throttle
+                                : input.currentThrottle;
 
-    if (!isChanged(this->request, request))
+    if (!isChanged(this->input, input))
         return false; // nothing to recalculate
 
     int timeDelta = max(0, millis() - this->lastTime); // the time since last calculation
     this->lastTime = millis();
 
-    this->request = request;
+    this->input = input;
 
-    float steering = abs(request.steering);
-    float currentThrottle = abs(request.currentThrottle);
-    float desiredThrottle = abs(request.desiredThrottle);
+    float steering = abs(input.steering);
+    float currentThrottle = abs(input.currentThrottle);
+    float desiredThrottle = abs(input.desiredThrottle);
 
     if (steering < EPSILON && desiredThrottle < EPSILON)
     {
-        this->request = ControllerInput::idle;
-        this->response = ControllerOutput::idle;
+        this->input = ControllerInput::idle;
+        this->output = ControllerOutput::idle;
         return true; // got back to idle
     }
 
-    bool isForward = request.desiredThrottle > EPSILON;
-    bool isBackward = request.desiredThrottle < -EPSILON;
-    bool isTurning = request.steering * this->turnSign > EPSILON;
+    bool isForward = input.desiredThrottle > EPSILON;
+    bool isBackward = input.desiredThrottle < -EPSILON;
+    bool isTurning = input.steering * this->turnSign > EPSILON;
 
     if (isForward)
     {
@@ -57,7 +59,7 @@ bool Controller::tryUpdate(ControllerInput request)
             acceleratedThrottle = max(acceleratedThrottle * turningFactor, THROTTLE_MIN);
         }
 
-        this->response = ControllerOutput(acceleratedThrottle, false /*reverse*/);
+        this->output = ControllerOutput(acceleratedThrottle, false /*reverse*/);
         return true;
     }
 
@@ -66,16 +68,13 @@ bool Controller::tryUpdate(ControllerInput request)
         float throttle = isTurning
                              ? 0.0f          // no move
                              : THROTTLE_REV; // min throttle to activate reverse
-        this->response = ControllerOutput(throttle, !isTurning /*reverse*/);
+        this->output = ControllerOutput(throttle, !isTurning /*reverse*/);
         return true;
     }
 
     // spinning
-    this->response = ControllerOutput(THROTTLE_REV, isTurning /*reverse*/);
+    this->output = ControllerOutput(THROTTLE_REV, isTurning /*reverse*/);
     return true;
 }
 
-ControllerOutput Controller::getDrive() { return this->response; }
-
-Controller leftController = Controller(true);
-Controller rightController = Controller(false);
+ControllerOutput Controller::getOutput() { return this->output; }

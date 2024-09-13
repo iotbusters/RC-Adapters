@@ -10,8 +10,6 @@ byte getSpeedLevel(float throttle)
     return 1; // unknown scenario
 }
 
-ControllerOutput::ControllerOutput() : throttle(0.0), speed(0), speedThrottle(0.0), isReversed(false) {}
-
 ControllerOutput::ControllerOutput(float throttle, bool isReversed)
 {
     this->throttle = throttle;
@@ -19,14 +17,17 @@ ControllerOutput::ControllerOutput(float throttle, bool isReversed)
     this->speed = getSpeedLevel(throttle);
     // map proportionally the controller throttle to selected speed throttle [10-100%]
     this->speedThrottle = mapNumber(throttle, maxSpeeds[this->speed - 1], maxSpeeds[this->speed], THROTTLE_MIN, THROTTLE_MAX);
-    this->isReversed = isReversed;
+    this->reversed = isReversed;
 }
 
-bool ControllerOutput::Breaks() { return *this == ControllerOutput::idle; }
+bool ControllerOutput::Breaks()
+{
+    return *this == ControllerOutput::idle;
+}
 
 bool ControllerOutput::operator==(const ControllerOutput &other) const
 {
-    return speed == other.speed && throttle == other.throttle && isReversed == other.isReversed;
+    return speed == other.speed && throttle == other.throttle && reversed == other.reversed;
 }
 
 bool ControllerOutput::operator!=(const ControllerOutput &other) const

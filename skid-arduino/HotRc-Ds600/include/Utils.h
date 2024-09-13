@@ -1,5 +1,10 @@
+#pragma once
+
 #include <Arduino.h>
 #include <Assert.h>
+
+#define INT_12BIT_MIN 0
+#define INT_12BIT_MAX 4095
 
 #define EPSILON_FLOAT 0.001f // considered as a smallest number with floating point
 
