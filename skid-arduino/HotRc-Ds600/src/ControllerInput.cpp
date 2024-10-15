@@ -1,12 +1,3 @@
 #include <ControllerInput.h>
 
-ControllerInput::ControllerInput() : currentThrottle(0.0), desiredThrottle(0.0), steering(0.0) {}
-
-ControllerInput::ControllerInput(float currentThrottle, float desiredThrottle, float steering)
-{
-    this->currentThrottle = currentThrottle;
-    this->desiredThrottle = desiredThrottle;
-    this->steering = steering;
-}
-
-ControllerInput ControllerInput::idle;
+ControllerInput ControllerInput::idle(0.0, 0.0);

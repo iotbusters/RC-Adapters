@@ -2,12 +2,12 @@
 #include <I2C.h>
 #include <Relays.h>
 
-void Relays::begin()
+void Relays::begin() const
 {
-    this->i2c.write(I2C_ADR_RELAYS, 0xFF);
+    this->i2c.writeInteger12Bit(I2C_ADR_RELAYS, 0xFF);
 }
 
-void Relays::write(bool breaks, RelayWheelInput left, RelayWheelInput right)
+void Relays::write(const bool breaks, const RelayWheelInput &left, const RelayWheelInput &right) const
 {
     byte relays = 0x00;
     relays |= (byte)!breaks << I2C_RELAY_BREAKS;
@@ -15,5 +15,6 @@ void Relays::write(bool breaks, RelayWheelInput left, RelayWheelInput right)
     relays |= (byte)right.reversed << I2C_RELAY_REVERSE_R;
     relays |= (byte)left.lowSpeed << I2C_RELAY_SPEED2_L;
     relays |= (byte)right.lowSpeed << I2C_RELAY_SPEED2_R;
-    this->i2c.write(I2C_ADR_RELAYS, ~relays); // inverted bits
+
+    this->i2c.writeByte(I2C_ADR_RELAYS, ~relays); // inverted bits
 }

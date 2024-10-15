@@ -2,7 +2,7 @@
 #include <Utils.h>
 #include <Pins.h>
 
-void Adc::begin()
+void Adc::begin() const
 {
     for (auto i = 0; i < this->size; i++)
     {
@@ -11,13 +11,13 @@ void Adc::begin()
     }
 }
 
-float Adc::readCurrentThrottle()
+float Adc::readCurrentThrottle() const
 {
     auto currentThrottleSignal = this->read12BitSignal();
     return mapNumber(currentThrottleSignal, THROTTLE_CURRENT_MIN, THROTTLE_CURRENT_MAX, 0.0f, 1.0f);
 }
 
-int Adc::read12BitSignal()
+int Adc::read12BitSignal() const
 {
     // note: ensure non-zero to cover a lost wire connection case by adding a pull-down 6-7k resistor on each pin
     // todo: ensure reducing controller's 24V current throttle signal to 5V by adding a voltage divider

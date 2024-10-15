@@ -20,8 +20,8 @@ private:
 
 public:
     Adc(const byte *addresses, const byte size) : addresses(addresses), size(size) {}
-    void begin();
+    void begin() const;
 
-    float readCurrentThrottle();
-    int read12BitSignal();
+    float readCurrentThrottle() const;
+    int read12BitSignal() const;
 };

@@ -1,18 +1,18 @@
 #include <Ds600Rx.h>
 #include <Utils.h>
 #include <Pins.h>
+#include <Debug.h>
 
-float channel(byte channel, int min, int max)
+static float map(int value, int min, int max)
 {
-    int channelValue = pulseIn(channel, HIGH);
-    channelValue = compareExchange(channelValue, (min + max) / 2, 0);
-    return mapNumber(channelValue, min, max, -1.0f, 1.0f);
+    value = compareExchange(value, (min + max) / 2, 0);
+    return mapNumber(value, min, max, -1.0f, 1.0f);
 }
 
 void Ds600Rx::begin()
 {
     // ensure non-zero as actual zero in the center
-    // a pull-down 6-7k resistor on each pin is required
+    // a pull-down 6-7k(10k) resistor on each pin is required
 
     pinMode(CH1, INPUT);
     pinMode(CH2, INPUT);
@@ -25,10 +25,14 @@ void Ds600Rx::begin()
 
 float Ds600Rx::channel1()
 {
-    return channel(CH1, SIG_STEERING_MIN, SIG_STEERING_MAX);
+    // Serial.print("CH1=");
+    // Serial.println(pulseIn(CH1, HIGH));
+    return map(pulseIn(CH1, HIGH), DS600RX_STEERING_MIN, DS600RX_STEERING_MAX);
 }
 
 float Ds600Rx::channel2()
 {
-    return channel(CH2, SIG_THROTTLE_MIN, SIG_THROTTLE_MAX);
+    // Serial.print("CH2=");
+    // Serial.println(pulseIn(CH2, HIGH));
+    return map(pulseIn(CH2, HIGH), DS600RX_THROTTLE_MIN, DS600RX_THROTTLE_MAX);
 }

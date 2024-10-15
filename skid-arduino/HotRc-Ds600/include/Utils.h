@@ -21,7 +21,7 @@ TOut mapNumber(const TIn x, const TIn in_min, const TIn in_max, const TOut out_m
 }
 
 template <typename T, byte N>
-T numberAverage(const T (&array)[N])
+T averageNumber(const T (&array)[N])
 {
     static_assert(N > 0, "Array must contain at least one element");
     T sum = 0;

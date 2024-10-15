@@ -14,13 +14,13 @@
 class Dac
 {
 private:
-    I2c &i2c;
-    byte address;
+    const I2c &i2c;
+    const byte address;
 
 public:
-    Dac(I2c &i2c, byte address) : i2c(i2c), address(address) {}
-    void begin();
+    Dac(const I2c &i2c, byte address) : i2c(i2c), address(address) {}
+    void begin() const;
 
-    void write(float throttle);
-    void write(int value12Bit);
+    void write(float throttle) const;
+    void write(int value12Bit) const;
 };

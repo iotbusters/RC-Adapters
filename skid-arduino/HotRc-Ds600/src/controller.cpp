@@ -2,32 +2,24 @@
 #include <Controller.h>
 #include <Utils.h>
 
-bool isChanged(ControllerInput last, ControllerInput next)
+bool Controller::isChanged(const ControllerInput &next)
 {
-    return abs(next.desiredThrottle - next.currentThrottle) > EPSILON    // throttle is being accelerated smoothly up to desired value
-           || abs(last.desiredThrottle - next.desiredThrottle) > EPSILON // no relevant desired throttle change
-           || abs(last.steering - next.steering) > EPSILON;              // no relevant steering change
+    return abs(this->output.throttle - next.desiredThrottle) > EPSILON          // throttle is being accelerated smoothly up to desired value
+           || abs(this->input.desiredThrottle - next.desiredThrottle) > EPSILON // no relevant desired throttle change
+           || abs(this->input.steering - next.steering) > EPSILON;              // no relevant steering change
 }
 
-Controller::Controller(bool isLeft) { this->turnSign = isLeft ? -1 : 1; }
-
-bool Controller::tryUpdate(ControllerInput input)
+bool Controller::tryUpdate(const ControllerInput &input)
 {
-    // todo: remove once the current throttle feature is supported
-    input.currentThrottle = input.currentThrottle == 0
-                                ? this->output.throttle
-                                : input.currentThrottle;
-
-    if (!isChanged(this->input, input))
+    if (!this->isChanged(input))
         return false; // nothing to recalculate
 
-    int timeDelta = max(0, millis() - this->lastTime); // the time since last calculation
+    int timeDelta = millis() - this->lastTime; // the time since last calculation
     this->lastTime = millis();
 
     this->input = input;
 
     float steering = abs(input.steering);
-    float currentThrottle = abs(input.currentThrottle);
     float desiredThrottle = abs(input.desiredThrottle);
 
     if (steering < EPSILON && desiredThrottle < EPSILON)
@@ -49,7 +41,7 @@ bool Controller::tryUpdate(ControllerInput input)
         // [ ] smoothly accelerating throttle up to requested value by increasing 20% current throttle to desired
 
         // smoothly accelerated throttle up to its desired value
-        float acceleratedThrottle = min(currentThrottle + THROTTLE_ACC_INC(timeDelta), desiredThrottle);
+        float acceleratedThrottle = min(this->output.throttle + THROTTLE_ACC_INC(timeDelta), desiredThrottle);
 
         if (isTurning)
         {
@@ -77,4 +69,4 @@ bool Controller::tryUpdate(ControllerInput input)
     return true;
 }
 
-ControllerOutput Controller::getOutput() { return this->output; }
+const ControllerOutput &Controller::getOutput() const { return this->output; }

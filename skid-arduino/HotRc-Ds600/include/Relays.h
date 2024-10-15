@@ -23,11 +23,12 @@
 class Relays
 {
 private:
-    I2c &i2c;
+    const I2c &i2c;
 
 public:
-    Relays(I2c &i2c) : i2c(i2c) {}
-    void begin();
+    explicit Relays(const I2c &i2c) : i2c(i2c) {}
+    
+    void begin() const;
 
-    void write(bool breaks, RelayWheelInput left, RelayWheelInput right);
+    void write(const bool breaks, const RelayWheelInput &left, const RelayWheelInput &right) const;
 };

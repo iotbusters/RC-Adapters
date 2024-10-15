@@ -1,12 +1,23 @@
 #include <Debug.h>
 
-void debug(const char label[], ControllerOutput output)
+void Debug::begin()
+{
+    Serial.begin(9600); // debugging serial
+}
+
+void Debug::logLn(const ControllerOutput &left, const ControllerOutput &right)
+{
+    Debug::log("Left", left);
+    Debug::logLn("  Right", right);
+}
+
+void Debug::log(const char label[], const ControllerOutput &output)
 {
     Serial.print(label);
     Serial.print(": (");
     Serial.print(output.speed);
     Serial.print(!output.reversed ? "F) " : "R) ");
-    if (!output.Breaks())
+    if (!output.breaks())
     {
         Serial.print(output.speedThrottle, 3);
         Serial.print("(");
@@ -17,17 +28,18 @@ void debug(const char label[], ControllerOutput output)
         Serial.print("[break]");
 }
 
-void Debug::begin()
+void Debug::logLn(const char label[], const ControllerOutput &output)
 {
-    Serial.begin(9600); // debugging serial
-}
-void Debug::log(ControllerOutput left, ControllerOutput right)
-{
-    debug("Left", left);
-
-    Serial.print("  ");
-
-    debug("Right", right);
-
+    Debug::log(label, output);
     Serial.println();
+}
+
+void Debug::log(const char label[])
+{
+    Serial.print(label);
+}
+
+void Debug::logLn(const char label[])
+{
+    Serial.println(label);
 }

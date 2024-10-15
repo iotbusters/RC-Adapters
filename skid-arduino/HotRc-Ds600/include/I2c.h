@@ -9,11 +9,11 @@ private:
     TwoWire &wire;
 
 public:
-    I2c(TwoWire &wire) : wire(wire) {}
-
-    void write(int address, const int value12Bit);
-    void write(int address, const byte value);
+    explicit I2c(TwoWire &wire) : wire(wire) {}
 
     template <size_t size>
-    void write(int address, const byte (&data)[size]);
+    void writeBytes(const int address, const byte (&data)[size]) const;
+
+    void writeInteger12Bit(const int address, const int value12Bit) const;
+    void writeByte(const int address, const byte value) const;
 };

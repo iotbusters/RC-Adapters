@@ -2,12 +2,11 @@
 
 struct ControllerInput
 {
+public:
     static ControllerInput idle;
 
-    float currentThrottle; // current average throttle value [0..1]
     float desiredThrottle; // desired throttle value [0..1]
     float steering;        // steering value [0..1]
 
-    ControllerInput();
-    ControllerInput(float currentThrottle, float desiredThrottle, float steering);
+    ControllerInput(float desiredThrottle, float steering) : desiredThrottle(desiredThrottle), steering(steering) {}
 };

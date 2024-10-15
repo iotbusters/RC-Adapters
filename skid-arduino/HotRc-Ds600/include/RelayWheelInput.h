@@ -3,8 +3,8 @@
 struct RelayWheelInput
 {
 public:
-    RelayWheelInput(bool reversed, bool lowSpeed) : reversed(reversed), lowSpeed(lowSpeed) {}
+    const bool reversed;
+    const bool lowSpeed;
 
-    bool reversed;
-    bool lowSpeed;
+    RelayWheelInput(bool reversed, bool lowSpeed) : reversed(reversed), lowSpeed(lowSpeed) {}
 };
