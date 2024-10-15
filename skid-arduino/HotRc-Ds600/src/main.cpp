@@ -9,48 +9,30 @@
 #include <Dac.h>
 #include <Adc.h>
 #include <Ds600Rx.h>
-#include <Arduino-CRSF-software.h>
+#include <Es900Rx.h>
 #include <Utils.h>
-#include <HardwareSerial.h>
 #include <Pins.h>
 
 Controller leftController(true);
 Controller rightController(false);
-Adc leftCurrentThrottle(leftCurrentThrottlePins, size(leftCurrentThrottlePins));
-Adc rightCurrentThrottle(rightCurrentThrottlePins, size(leftCurrentThrottlePins));
-I2c i2c(Wire);
-SoftwareSerial serial(UART_CRSF_RX, UART_CRSF_TX);
-CRSF crossfire;
-Dac leftThrottle(i2c, I2C_ADR_THROTTLE_L);
-Dac rightThrottle(i2c, I2C_ADR_THROTTLE_R);
-Relays relays(i2c);
 
-float steering;
-float desiredThrottle;
-void onCrossfireDataReceived(const uint16_t channels[])
-{
-  steering = channels[0];
-  desiredThrottle = channels[1];
-}
+Es900Rx primaryRx;
+Ds600Rx secondaryRx;
+
+const I2c i2c(Wire);
+const Dac leftThrottle(i2c, I2C_ADR_THROTTLE_L);
+const Dac rightThrottle(i2c, I2C_ADR_THROTTLE_R);
+const Relays relays(i2c);
+
+auto nextUpdate = millis();
 
 void setup()
 {
-  // Debug and Arduino-CRSF use the same hardware serial,
-  // so it was updated privately to Arduino-CRSF-software.
   Debug::begin();
+  primaryRx.begin();
+  secondaryRx.begin();
+  Wire.begin(); // connecting the master to I2C peripherals.
 
-  Ds600Rx::begin();
-
-  Wire.begin(); // connecting the master to I2C peripherals
-
-  // Debug and Arduino-CRSF use the same hardware serial,
-  // so it was updated privately to Arduino-CRSF-software.
-  serial.begin(115200);
-  crossfire.begin(&serial, 115200);
-  crossfire.onDataReceived(onCrossfireDataReceived);
-
-  leftCurrentThrottle.begin();
-  rightCurrentThrottle.begin();
   leftThrottle.begin();
   rightThrottle.begin();
   relays.begin();
@@ -60,46 +42,55 @@ void setup()
 
 void loop()
 {
-  auto currentLeftThrottle = leftCurrentThrottle.readCurrentThrottle();
-  auto currentRightThrottle = rightCurrentThrottle.readCurrentThrottle();
+  auto isLinked = primaryRx.tryLink();
+  auto currentTime = millis();
 
-  crossfire.readPacket();
-  if (!crossfire.isConnected())
+  if (nextUpdate > currentTime)
+    return;
+
+  auto steering = 0.0;
+  auto desiredThrottle = 0.0;
+
+  if (isLinked)
   {
-    steering = Ds600Rx::channel1();
-    desiredThrottle = Ds600Rx::channel2();
+    steering = primaryRx.channel1();
+    desiredThrottle = primaryRx.channel2();
+  }
+  else
+  {
+    steering = secondaryRx.channel1();
+    desiredThrottle = secondaryRx.channel2();
   }
 
-  auto leftInput = ControllerInput(currentLeftThrottle, desiredThrottle, steering);
-  auto rightInput = ControllerInput(currentRightThrottle, desiredThrottle, steering);
+  const auto input = ControllerInput(desiredThrottle, steering);
 
-  auto isLeftChanged = leftController.tryUpdate(leftInput);
-  auto isRightChanged = rightController.tryUpdate(rightInput);
+  const auto isLeftChanged = leftController.tryUpdate(input);
+  const auto isRightChanged = rightController.tryUpdate(input);
+
   if (!isLeftChanged && !isRightChanged)
   {
-    delay(300);
+    nextUpdate = currentTime + 200;
     return; // skip if no changes
   }
 
   digitalWrite(LED_BUILTIN, HIGH);
 
-  ControllerOutput leftOutput = leftController.getOutput(),
-                   rightOutput = rightController.getOutput();
+  const auto &leftOutput = leftController.getOutput(),
+             &rightOutput = rightController.getOutput();
 
-  // Debug and Arduino-CRSF use the same hardware serial,
-  // so it was updated privately to Arduino-CRSF-software.
-  Debug::log(leftOutput, rightOutput);
+  Debug::logLn(leftOutput, rightOutput);
 
-  auto breaks = leftOutput.Breaks() || rightOutput.Breaks();
-  auto leftWheel = RelayWheelInput(leftOutput.reversed, leftOutput.speed == 2);
-  auto rightWheel = RelayWheelInput(rightOutput.reversed, rightOutput.speed == 2);
+  const auto breaks = leftOutput.breaks() || rightOutput.breaks();
+  const auto leftWheel = RelayWheelInput(leftOutput.reversed, leftOutput.speed == 2);
+  const auto rightWheel = RelayWheelInput(rightOutput.reversed, rightOutput.speed == 2);
   relays.write(breaks, leftWheel, rightWheel);
 
-  delay(100); // ensure controller is updated to interpret throttle correctly
+  delay(10); // ensure controller is updated to interpret throttle correctly
 
   leftThrottle.write(leftOutput.speedThrottle);
   rightThrottle.write(rightOutput.speedThrottle);
 
   digitalWrite(LED_BUILTIN, LOW);
-  delay(200);
+
+  nextUpdate = currentTime + 200;
 }
