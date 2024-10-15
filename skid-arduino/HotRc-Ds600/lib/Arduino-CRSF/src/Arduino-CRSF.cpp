@@ -65,7 +65,7 @@ void CRSF::readPacket()
                     m_disconnected = false;
                     updateChannels();
                 }
-                s else
+                else
                 {
                     // failsafe_status = CRSF_SIGNAL_LOST;
                 }
