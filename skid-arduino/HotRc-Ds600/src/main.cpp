@@ -24,7 +24,7 @@ const Dac leftThrottle(i2c, I2C_ADR_THROTTLE_L);
 const Dac rightThrottle(i2c, I2C_ADR_THROTTLE_R);
 const Relays relays(i2c);
 
-auto nextUpdate = millis();
+auto nextTime = millis();
 
 void setup()
 {
@@ -42,34 +42,19 @@ void setup()
 
 void loop()
 {
-  auto isLinked = primaryRx.tryLink();
-  auto currentTime = millis();
+  const auto time = millis();
+  const auto rxOutput = primaryRx.tryRead() || secondaryRx.tryRead();
 
-  if (nextUpdate > currentTime)
+  if (nextTime > time || !rxOutput.isLinked)
     return;
 
-  auto steering = 0.0;
-  auto desiredThrottle = 0.0;
-
-  if (isLinked)
-  {
-    steering = primaryRx.channel1();
-    desiredThrottle = primaryRx.channel2();
-  }
-  else
-  {
-    steering = secondaryRx.channel1();
-    desiredThrottle = secondaryRx.channel2();
-  }
-
-  const auto input = ControllerInput(desiredThrottle, steering);
-
+  const auto input = ControllerInput(rxOutput.steering, rxOutput.throttle);
   const auto isLeftChanged = leftController.tryUpdate(input);
   const auto isRightChanged = rightController.tryUpdate(input);
 
   if (!isLeftChanged && !isRightChanged)
   {
-    nextUpdate = currentTime + 200;
+    nextTime = time + 200;
     return; // skip if no changes
   }
 
@@ -92,5 +77,5 @@ void loop()
 
   digitalWrite(LED_BUILTIN, LOW);
 
-  nextUpdate = currentTime + 200;
+  nextTime = time + 200;
 }

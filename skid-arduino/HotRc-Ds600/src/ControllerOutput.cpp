@@ -31,4 +31,4 @@ bool ControllerOutput::operator!=(const ControllerOutput &other) const
     return !(*this == other);
 }
 
-ControllerOutput ControllerOutput::idle(0.0, false);
+const ControllerOutput ControllerOutput::idle(0.0, false);

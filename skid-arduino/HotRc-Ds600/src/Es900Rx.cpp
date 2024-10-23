@@ -3,41 +3,60 @@
 #include <Utils.h>
 #include <crc8.h>
 
-auto isLinked = false;
-
-static float map(int value, int min, int max)
-{
-    value = compareExchange(value, (min + max) / 2, 0);
-    return mapNumber(value, min, max, -1.0f, 1.0f);
-}
+static float mapFloat(int value, int min, int max);
 
 void Es900Rx::begin()
 {
     this->crossfire.begin(&this->serial, 115200);
 }
 
-bool Es900Rx::tryLink()
+const RxOutput Es900Rx::tryRead()
 {
     if (!this->serial.isListening())
         this->serial.listen();
 
     this->crossfire.readPacket();
 
-    if (isLinked != this->crossfire.isConnected())
+    if (this->linked != this->crossfire.isConnected())
     {
-        isLinked = !isLinked;
-        Debug::logLn(isLinked ? "Es900Rx linked" : "Es900Rx unlinked");
+        this->linked = !this->linked;
+        Debug::logLn(this->linked ? "ES900RX LINKED" : "ES900RX UNLINKED");
     }
 
-    return this->crossfire.isConnected();
+    if (this->armed != this->isArmed())
+    {
+        this->armed = !this->armed;
+        Debug::logLn(this->armed ? "ES900RX ARMED" : "ES900RX DISARMED");
+    }
+
+    return this->linked
+               ? RxOutput(this->getSteering(), this->getThrottle())
+               : RxOutput::unlinked;
 }
 
-float Es900Rx::channel1()
+float Es900Rx::getSteering() const
 {
-    return map(this->crossfire.getChannel(1), ES900RX_STEERING_MIN, ES900RX_STEERING_MAX);
+    if (!this->armed)
+        return 0.0;
+
+    return mapFloat(this->crossfire.getChannel(1), ES900RX_STEERING_MIN, ES900RX_STEERING_MAX);
 }
 
-float Es900Rx::channel2()
+float Es900Rx::getThrottle() const
 {
-    return map(this->crossfire.getChannel(2), ES900RX_THROTTLE_MIN, ES900RX_THROTTLE_MAX);
+    if (!this->armed)
+        return 0.0;
+
+    return mapFloat(this->crossfire.getChannel(2), ES900RX_THROTTLE_MIN, ES900RX_THROTTLE_MAX);
+}
+
+bool Es900Rx::isArmed() const
+{
+    return this->crossfire.getChannel(5) > ES900RX_AUX_MIN;
+}
+
+static float mapFloat(int value, int min, int max)
+{
+    value = compareExchange(value, (min + max) / 2, 0);
+    return mapNumber(value, min, max, -1.0f, 1.0f);
 }

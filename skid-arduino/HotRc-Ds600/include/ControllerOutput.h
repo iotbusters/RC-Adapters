@@ -13,7 +13,7 @@ const float maxSpeeds[] = {SPEED_STOP, SPEED_2_MAX, SPEED_3_MAX};
 struct ControllerOutput
 {
 public:
-    static ControllerOutput idle;
+    static const ControllerOutput idle;
 
     float throttle;      // controller throttle value [0..1]
     byte speed;          // speed gear

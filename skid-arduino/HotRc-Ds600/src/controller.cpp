@@ -14,13 +14,13 @@ bool Controller::tryUpdate(const ControllerInput &input)
     if (!this->isChanged(input))
         return false; // nothing to recalculate
 
-    int timeDelta = millis() - this->lastTime; // the time since last calculation
+    auto timeDelta = millis() - this->lastTime; // the time since last calculation
     this->lastTime = millis();
 
     this->input = input;
 
-    float steering = abs(input.steering);
-    float desiredThrottle = abs(input.desiredThrottle);
+    auto steering = abs(input.steering);
+    auto desiredThrottle = abs(input.desiredThrottle);
 
     if (steering < EPSILON && desiredThrottle < EPSILON)
     {
@@ -29,9 +29,9 @@ bool Controller::tryUpdate(const ControllerInput &input)
         return true; // got back to idle
     }
 
-    bool isForward = input.desiredThrottle > EPSILON;
-    bool isBackward = input.desiredThrottle < -EPSILON;
-    bool isTurning = input.steering * this->turnSign > EPSILON;
+    auto isForward = input.desiredThrottle > EPSILON;
+    auto isBackward = input.desiredThrottle < -EPSILON;
+    auto isTurning = input.steering * this->turnSign > EPSILON;
 
     if (isForward)
     {
@@ -41,12 +41,12 @@ bool Controller::tryUpdate(const ControllerInput &input)
         // [ ] smoothly accelerating throttle up to requested value by increasing 20% current throttle to desired
 
         // smoothly accelerated throttle up to its desired value
-        float acceleratedThrottle = min(this->output.throttle + THROTTLE_ACC_INC(timeDelta), desiredThrottle);
+        auto acceleratedThrottle = min(this->output.throttle + THROTTLE_ACC_INC(timeDelta), desiredThrottle);
 
         if (isTurning)
         {
             // impact accelerated throttle proportionally to its desired and steering values
-            float turningFactor = (1.0f - steering * STEERING_MULT / desiredThrottle);
+            auto turningFactor = (1.0f - steering * STEERING_MULT / desiredThrottle);
             // drop throttle down to turn
             acceleratedThrottle = max(acceleratedThrottle * turningFactor, THROTTLE_MIN);
         }
