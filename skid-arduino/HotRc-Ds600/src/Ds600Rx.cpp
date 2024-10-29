@@ -22,7 +22,7 @@ void Ds600Rx::begin() const
     // pinMode(CH6, INPUT);
 }
 
-const RxOutput Ds600Rx::tryRead()
+const bool Ds600Rx::tryRead()
 {
     updateChannels(
         this->channels[CH_STEERING],
@@ -60,6 +60,11 @@ const RxOutput Ds600Rx::tryRead()
         calibrateLimits(throttleLimits, this->channels[CH_THROTTLE][CH_VALUE_CURR], DS600RX_THROTTLE_MIN, DS600RX_THROTTLE_MAX);
     }
 
+    return this->linked;
+}
+
+RxOutput Ds600Rx::getOutput() const
+{
     return this->linked
                ? RxOutput(this->getSteering(), this->getThrottle())
                : RxOutput::unlinked;

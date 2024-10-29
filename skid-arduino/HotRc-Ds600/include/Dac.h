@@ -18,9 +18,9 @@ private:
     const byte address;
 
 public:
-    Dac(const I2c &i2c, byte address) : i2c(i2c), address(address) {}
+    Dac(const I2c &i2c, const byte &address) : i2c(i2c), address(address) {}
     void begin() const;
 
-    void write(float throttle) const;
-    void write(int value12Bit) const;
+    void write(const float &throttle) const;
+    void write(const int &value12Bit) const;
 };

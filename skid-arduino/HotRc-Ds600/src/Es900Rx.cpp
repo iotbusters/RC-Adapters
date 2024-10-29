@@ -10,7 +10,7 @@ void Es900Rx::begin()
     this->crossfire.begin(&this->serial, 115200);
 }
 
-const RxOutput Es900Rx::tryRead()
+const bool Es900Rx::tryRead()
 {
     if (!this->serial.isListening())
         this->serial.listen();
@@ -29,6 +29,11 @@ const RxOutput Es900Rx::tryRead()
         Debug::logLn(this->armed ? "ES900RX ARMED" : "ES900RX DISARMED");
     }
 
+    return this->linked;
+}
+
+RxOutput Es900Rx::getOutput() const
+{
     return this->linked
                ? RxOutput(this->getSteering(), this->getThrottle())
                : RxOutput::unlinked;

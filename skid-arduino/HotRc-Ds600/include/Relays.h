@@ -27,8 +27,8 @@ private:
 
 public:
     explicit Relays(const I2c &i2c) : i2c(i2c) {}
-    
+
     void begin() const;
 
-    void write(const bool breaks, const RelayWheelInput &left, const RelayWheelInput &right) const;
+    void write(const bool &breaks, const RelayWheelInput &left, const RelayWheelInput &right) const;
 };

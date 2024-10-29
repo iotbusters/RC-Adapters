@@ -53,5 +53,6 @@ private:
 public:
     void begin() const;
 
-    const RxOutput tryRead();
+    const bool tryRead();
+    RxOutput getOutput() const;
 };
