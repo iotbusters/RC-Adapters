@@ -14,7 +14,8 @@ public:
     const float steering;
     const float throttle;
 
-    RxOutput(float steering, float throttle) : isLinked(true), steering(steering), throttle(throttle) {}
+    RxOutput(float steering, float throttle)
+        : isLinked(true), steering(steering), throttle(throttle) {}
 
     const RxOutput &operator||(const RxOutput &other) const;
 };

@@ -1,31 +1,30 @@
 #include <Es900Rx.h>
-#include <Debug.h>
 #include <Utils.h>
 
 static float mapFloat(int value, int min, int max);
 
 void Es900Rx::begin()
 {
-    this->crossfire.begin(&this->serial, 115200);
+    this->crossfire.begin(&this->crossfireSerial, 115200);
 }
 
 const bool Es900Rx::tryRead()
 {
-    if (!this->serial.isListening())
-        this->serial.listen();
+    if (!this->crossfireSerial.isListening())
+        this->crossfireSerial.listen();
 
     this->crossfire.readPacket();
 
     if (this->linked != this->crossfire.isConnected())
     {
         this->linked = !this->linked;
-        Debug::logLn(this->linked ? "ES900RX LINKED" : "ES900RX UNLINKED");
+        this->logger.println(this->linked ? "ES900RX LINKED" : "ES900RX UNLINKED");
     }
 
     if (this->armed != this->isArmed())
     {
         this->armed = !this->armed;
-        Debug::logLn(this->armed ? "ES900RX ARMED" : "ES900RX DISARMED");
+        this->logger.println(this->armed ? "ES900RX ARMED" : "ES900RX DISARMED");
     }
 
     return this->linked;

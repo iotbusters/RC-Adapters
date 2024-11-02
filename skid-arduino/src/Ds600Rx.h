@@ -4,13 +4,6 @@
 #include <RxOutput.h>
 #include <Pins.h>
 
-#define CH1 PIN_D2 // RC channel 1 (steering) pin
-#define CH2 PIN_D3 // RC channel 2 (throttle) pin
-#define CH3 PIN_D4 // RC channel 3 (auxiliary) pin
-#define CH4 PIN_D5 // RC channel 4 (auxiliary) pin
-#define CH5 PIN_D6 // RC channel 5 (auxiliary) pin
-#define CH6 PIN_D7 // RC channel 6 (auxiliary) pin
-
 #define DS600RX_STEERING_MIN 551     // PWM min value of steering control
 #define DS600RX_STEERING_MAX 2530    // PWM max value of steering control
 #define DS600RX_THROTTLE_MIN 1090    // PWM min value of throttle control
@@ -27,6 +20,7 @@
 #define CH_VALUE_PREV 0 // previous received channel index
 #define CH_VALUE_CURR 1 // currently accepted channel index
 
+#define CH_COUNT 4
 #define CH_STEERING 0    // steering channel index
 #define CH_THROTTLE 1    // throttle channel index
 #define CH_ARMING 2      // arming channel index
@@ -38,8 +32,10 @@
 class Ds600Rx
 {
 private:
+    HardwareSerial &logger;
+    const byte channelPins[CH_COUNT];
     // 4 channels with {previous, latest} values
-    uint16_t channels[4][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
+    uint16_t channels[CH_COUNT][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
     bool linked = false;
     bool armed = false;
 
@@ -51,6 +47,9 @@ private:
     // bool channel4();
 
 public:
+    Ds600Rx(HardwareSerial &logger, const byte steeringPin, const byte throttlePin, const byte armingPin, const byte calibratingPin)
+        : logger(logger), channelPins{steeringPin, throttlePin, armingPin, calibratingPin} {}
+
     void begin() const;
 
     const bool tryRead();

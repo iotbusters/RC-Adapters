@@ -4,7 +4,7 @@
 
 void Relays::begin() const
 {
-    this->i2c.writeInteger12Bit(I2C_ADR_RELAYS, 0xFF);
+    this->i2c.write(I2C_ADR_RELAYS, 0xFF);
 }
 
 void Relays::write(const bool &breaks, const RelayWheelInput &left, const RelayWheelInput &right) const
@@ -16,5 +16,5 @@ void Relays::write(const bool &breaks, const RelayWheelInput &left, const RelayW
     relays |= (byte)right.reversed << I2C_RELAY_REVERSE_R;
     relays |= (byte)right.highSpeed << I2C_RELAY_SPEED2_R;
 
-    this->i2c.writeByte(I2C_ADR_RELAYS, ~relays); // inverted bits
+    this->i2c.write(I2C_ADR_RELAYS, ~relays); // inverted bits
 }

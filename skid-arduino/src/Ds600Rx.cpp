@@ -1,7 +1,6 @@
 #include <Ds600Rx.h>
 #include <Utils.h>
 #include <Pins.h>
-#include <Debug.h>
 
 static uint16_t steeringLimits[2] = {DS600RX_STEERING_MIN, DS600RX_STEERING_MAX};
 static uint16_t throttleLimits[2] = {DS600RX_THROTTLE_MIN, DS600RX_THROTTLE_MAX};
@@ -13,10 +12,10 @@ void Ds600Rx::begin() const
 {
     // ensure non-zero as actual zero in the center
     // a pull-down 6-7k(10k) resistor on each pin is required
-    pinMode(CH1, INPUT);
-    pinMode(CH2, INPUT);
-    pinMode(CH3, INPUT);
-    pinMode(CH4, INPUT);
+    pinMode(this->channelPins[CH_STEERING], INPUT);
+    pinMode(this->channelPins[CH_THROTTLE], INPUT);
+    pinMode(this->channelPins[CH_ARMING], INPUT);
+    pinMode(this->channelPins[CH_CALIBRATING], INPUT);
     // note: unused
     // pinMode(CH5, INPUT);
     // pinMode(CH6, INPUT);
@@ -26,22 +25,22 @@ const bool Ds600Rx::tryRead()
 {
     updateChannels(
         this->channels[CH_STEERING],
-        pulseIn(CH1, HIGH, 5000),
+        pulseIn(this->channelPins[CH_STEERING], HIGH, 5000),
         steeringLimits[LIM_MIN],
         steeringLimits[LIM_MAX]);
     updateChannels(
         this->channels[CH_THROTTLE],
-        pulseIn(CH2, HIGH, 5000),
+        pulseIn(this->channelPins[CH_THROTTLE], HIGH, 5000),
         throttleLimits[LIM_MIN],
         throttleLimits[LIM_MAX]);
     updateChannels(
         this->channels[CH_ARMING],
-        pulseIn(CH3, HIGH, 5000),
+        pulseIn(this->channelPins[CH_ARMING], HIGH, 5000),
         DS600RX_ARMING_MIN,
         DS600RX_ARMING_MAX);
     updateChannels(
         this->channels[CH_CALIBRATING],
-        pulseIn(CH4, HIGH, 5000),
+        pulseIn(this->channelPins[CH_CALIBRATING], HIGH, 5000),
         DS600RX_CALIBRATING_MIN,
         DS600RX_CALIBRATING_MAX);
 
@@ -51,7 +50,7 @@ const bool Ds600Rx::tryRead()
     if (this->linked && this->armed != this->isArmed())
     {
         this->armed = !this->armed;
-        Debug::logLn(this->armed ? "DS600RX ARMED" : "DS600RX DISARMED");
+        this->logger.println(this->armed ? "DS600RX ARMED" : "DS600RX DISARMED");
     }
 
     if (this->linked && !this->armed && this->isCalibrating())

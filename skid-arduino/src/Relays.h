@@ -23,10 +23,10 @@
 class Relays
 {
 private:
-    const I2c &i2c;
+    const I2cMaster &i2c;
 
 public:
-    explicit Relays(const I2c &i2c) : i2c(i2c) {}
+    explicit Relays(const I2cMaster &i2c) : i2c(i2c) {}
 
     void begin() const;
 
