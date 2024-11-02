@@ -1,7 +1,6 @@
 #include <Es900Rx.h>
 #include <Debug.h>
 #include <Utils.h>
-#include <crc8.h>
 
 static float mapFloat(int value, int min, int max);
 

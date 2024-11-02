@@ -34,8 +34,8 @@ void StateMachine::writeRelays()
     const auto &leftOutput = this->leftController.getOutput(),
                &rightOutput = this->rightController.getOutput();
     const auto breaks = leftOutput.breaks() || rightOutput.breaks();
-    const auto leftWheel = RelayWheelInput(leftOutput.reversed, leftOutput.speed == 2);
-    const auto rightWheel = RelayWheelInput(rightOutput.reversed, rightOutput.speed == 2);
+    const auto leftWheel = RelayWheelInput(leftOutput.reversed, leftOutput.highSpeed);
+    const auto rightWheel = RelayWheelInput(rightOutput.reversed, rightOutput.highSpeed);
     this->relays.write(breaks, leftWheel, rightWheel);
 
     this->schedule(&StateMachine::writeThrottles, 100);

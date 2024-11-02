@@ -2,6 +2,13 @@
 #include <Controller.h>
 #include <Utils.h>
 
+// find speed level by the throttle
+byte getSpeedLevel(float throttle);
+// map proportionally the controller throttle to selected speed throttle [10-100%]
+float getSpeedThrottle(float throttle, int speed);
+//
+ControllerOutput createOutput(float throttle, bool reverse);
+
 bool Controller::isChanged(const ControllerInput &next)
 {
     return abs(this->output.throttle - next.desiredThrottle) > EPSILON          // throttle is being accelerated smoothly up to desired value
@@ -14,17 +21,16 @@ bool Controller::tryUpdate(const ControllerInput &input)
     if (!this->isChanged(input))
         return false; // nothing to recalculate
 
+    this->input = input;
+
     auto timeDelta = millis() - this->lastTime; // the time since last calculation
     this->lastTime = millis();
-
-    this->input = input;
 
     auto steering = abs(input.steering);
     auto desiredThrottle = abs(input.desiredThrottle);
 
     if (steering < EPSILON && desiredThrottle < EPSILON)
     {
-        this->input = ControllerInput::idle;
         this->output = ControllerOutput::idle;
         return true; // got back to idle
     }

@@ -15,7 +15,7 @@ void Debug::log(const char label[], const ControllerOutput &output)
 {
     Serial.print(label);
     Serial.print(": (");
-    Serial.print(output.speed);
+    Serial.print(output.highSpeed ? 2 : 1);
     Serial.print(!output.reversed ? "F) " : "R) ");
     if (!output.breaks())
     {
