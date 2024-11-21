@@ -21,7 +21,7 @@ void Debug::log(const char label[], const ControllerOutput &output)
     {
         Serial.print(output.speedThrottle, 3);
         Serial.print("(");
-        Serial.print(output.throttle, 3);
+        Serial.print(output.desiredThrottle, 3);
         Serial.print(")");
     }
     else
