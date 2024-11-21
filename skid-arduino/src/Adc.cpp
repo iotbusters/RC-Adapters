@@ -20,13 +20,13 @@
 
 // uint10_t Adc::getInteger(size_t index) const
 // {
-//     assert(index >= 1);
-//     assert(index <= this->count);
+//     ensure(index >= 1);
+//     ensure(index <= this->count);
 //     return this->values[index - 1];
 // }
 
-// ratio_t Adc::getRatio(const size_t index, const uint10_t min, const uint10_t max) const
+// float Adc::getRatio(const size_t index, const uint16_t min, const uint16_t max) const
 // {
 //     auto value = this->getInteger(index);
-//     return mapNumber(value, min, max, RATIO_MIN, RATIO_MAX);
+//     return mapNumber(value, min, max, UFRACT_MIN, RATIO_MAX);
 // }

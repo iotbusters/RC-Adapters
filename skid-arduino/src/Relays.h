@@ -1,6 +1,6 @@
 #pragma once
 
-#include <I2C.h>
+#include <I2c.h>
 #include <RelayWheelInput.h>
 
 // PCF8574 IO expansion board addresses [0x20..0x27]
@@ -20,15 +20,14 @@
 #define I2C_RELAY_REVERSE_R 3 // Right drive reverse pin on a 8bit IO expansion board
 #define I2C_RELAY_SPEED2_R 4  // Right drive 2nd speed pin on a 8bit IO expansion board
 
-class Relays
-{
+class Relays {
 private:
-    const I2cMaster &i2c;
+    const I2cMaster &i2cMaster;
 
 public:
-    explicit Relays(const I2cMaster &i2c) : i2c(i2c) {}
+    explicit Relays(const I2cMaster &i2cMaster) : i2cMaster(i2cMaster) {}
 
     void begin() const;
 
-    void write(const bool &breaks, const RelayWheelInput &left, const RelayWheelInput &right) const;
+    void write(const bool breaks, const RelayWheelInput &left, const RelayWheelInput &right) const;
 };

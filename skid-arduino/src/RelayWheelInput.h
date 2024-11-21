@@ -1,11 +1,9 @@
 #include <Arduino.h>
 
-struct RelayWheelInput
-{
+struct RelayWheelInput {
 public:
     const bool reversed;
     const bool highSpeed;
 
-    RelayWheelInput(bool reversed, bool highSpeed)
-        : reversed(reversed), highSpeed(highSpeed) {}
+    RelayWheelInput(const bool reversed, const bool highSpeed) : reversed(reversed), highSpeed(highSpeed) {}
 };

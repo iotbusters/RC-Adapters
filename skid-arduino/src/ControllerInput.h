@@ -1,13 +1,16 @@
 #pragma once
 
-struct ControllerInput
-{
+#include <Utils.h>
+
+struct ControllerInput {
 public:
     static const ControllerInput idle;
 
-    float steering;        // steering value [0..1]
-    float desiredThrottle; // desired throttle value [0..1]
+    const fract_t steering;        // steering ratio
+    const fract_t desiredThrottle; // desired throttle ratio
 
-    ControllerInput(float steering, float desiredThrottle)
-        : steering(steering), desiredThrottle(desiredThrottle) {}
+    ControllerInput() : steering(FRACT_ZERO), desiredThrottle(FRACT_ZERO) {}
+    ControllerInput(const fract_t steering, const fract_t desiredThrottle) : steering(steering), desiredThrottle(desiredThrottle) {}
+
+    void operator=(const ControllerInput &value) const { value = ControllerInput(steering, desiredThrottle); }
 };

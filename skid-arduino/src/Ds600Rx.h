@@ -1,8 +1,9 @@
 #pragma once
 
 #include <Arduino.h>
-#include <RxOutput.h>
 #include <Pins.h>
+#include <RxOutput.h>
+
 
 #define DS600RX_STEERING_MIN 551     // PWM min value of steering control
 #define DS600RX_STEERING_MAX 2530    // PWM max value of steering control
@@ -29,10 +30,8 @@
 #define LIM_MIN 0 // min limit
 #define LIM_MAX 1 // max limit
 
-class Ds600Rx
-{
+class Ds600Rx {
 private:
-    HardwareSerial &logger;
     const byte channelPins[CH_COUNT];
     // 4 channels with {previous, latest} values
     uint16_t channels[CH_COUNT][2] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
@@ -47,8 +46,8 @@ private:
     // bool channel4();
 
 public:
-    Ds600Rx(HardwareSerial &logger, const byte steeringPin, const byte throttlePin, const byte armingPin, const byte calibratingPin)
-        : logger(logger), channelPins{steeringPin, throttlePin, armingPin, calibratingPin} {}
+    Ds600Rx(const byte steeringPin, const byte throttlePin, const byte armingPin, const byte calibratingPin)
+        : channelPins{steeringPin, throttlePin, armingPin, calibratingPin} {}
 
     void begin() const;
 
